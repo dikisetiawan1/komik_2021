@@ -35,6 +35,10 @@ $routes->get('/', 'Pages::index');
 
 $routes->get('/komik/(:segment)', 'Komik::detail/$1');
 
+$routes->add('/komik/(:any)', 'Komik::create');
+
+
+
 /*
  * --------------------------------------------------------------------
  * Additional Routing
