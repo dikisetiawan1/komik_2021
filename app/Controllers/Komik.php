@@ -42,17 +42,51 @@ class Komik extends BaseController
             'komik' => $this->komikModel->getKomik($slug)
         ];
 
+        //jika komik tidak ada di tabel
 
-        echo view('komik/detail', $data);
+        if (empty($data['komik'])) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound('Judul komik ' . $slug . ' tidak ditemukan.');
+        }
+
+        return view('komik/detail', $data);
     }
 
 
 
     public function create()
     {
+        // session();
         $data = [
-            'title' => "Form Tambah Data Komik"
+            'title' => "Form Tambah Data Komik",
+            'validation' => \Config\Services::validation()
         ];
         return view('komik/create', $data);
+    }
+    public function save()
+    {
+
+        // validasi input
+        if (!$this->validate([ //validasi bisa di custom menggunakan array
+            'judul' => 'required|is_unique[komik.judul]',
+            'penulis' => 'required[komik.penulis]',
+            'penerbit' => 'required[komik.penerbit]',
+            'sampul' => 'required[komik.sampul]'
+
+        ])) {
+            $validation = \Config\Services::validation();
+            return redirect()->to('/komik/create')->withInput()->with('validation', $validation);
+        }
+
+
+        $slug = url_title($this->request->getVar('judul'), '-', true);
+        $this->komikModel->save([
+            'judul' => $this->request->getVar('judul'),
+            'slug' => $slug,
+            'penulis' => $this->request->getVar('penulis'),
+            'penerbit' => $this->request->getVar('penerbit'),
+            'sampul' => $this->request->getVar('sampul')
+        ]);
+
+        return redirect()->to('/komik');
     }
 }
